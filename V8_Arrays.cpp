@@ -480,40 +480,70 @@ for(int i =0;i<n;i++){
             // sum=3 so the length will be l-i(5-3=2) + 1=>3
     }
 } O(n^2)
-
-// Better
-[_ _ _ _ _ _]
-<----x---->
-<-k->
-    <-x-k->
-if the sum of the subarray till 4th pos is x
-we have to find sum of the elements k =7
-if we iterate till x and we found that there is a value which is equal to x-k then the left portion will have a sum of k 
-We found the subarray
-Use Hashmap
-
-{1,2,3,1,1,1,1,4,2,3}
-<----------> 9
-<----> 6
-     <-----> 3
-preSum=0
-len=0
-
-8,4
-7,3
-6,2
-3,1
-1,0
-
-// This will work only if 0s are not present
 */
 
-// This is for the Positives and 0s 
+// Better : For +ves and 0s , Optimal :  for +ves, -ves, 0s
+int longestSubarrayQithSumKBetter(vector<int> arr,int n,int k){
+    /*
+    [1,2,3,1,1,1,1,4,2,3]
+     i
+    sum=0, sum+=1, sum=1;
+    x
+    rem=-2
+    x
+    mp[1]=0
+
+    [1,2,3,1,1,1,1,4,2,3]
+       i
+    sum=1, sum+=2, sum=3
+    maxLen=2
+    rem=0
+    x
+    mp[3]=1
+
+    [1,2,3,1,1,1,1,4,2,3]
+         i
+    sum=3, sum+=3, sum=6
+    maxLen=2
+    rem=3
+    There is a sum before this (3,1) inside the hashmap
+    len=2-1=1
+    maxLen=(2,1) = 2
+    mp[6]=2;
+    
+    [1,2,3,1,1,1,1,4,2,3]
+               i
+    sum=9
+    maxLen=2
+    rem=6
+    Yes (6,2)
+    len=5-2=3
+    maxLen=(2,3)=3
+    mp[9]=3
+    */
+    unordered_map<int,int> mp;
+    int maxLen=0,sum=0;
+    for(int i=0;i<n;i++){
+        sum+=arr[i];
+        if(sum==k) maxLen=max(maxLen,i+1); // important line only wil be initaited till we find the first sum as 3 after it wont
+        int rem=sum-k;
+        if(mp.find(rem)!=mp.end()){ // if the rem was present
+            int len=i-mp[rem];
+            maxLen=max(maxLen,len);
+        }
+        if(mp.find(sum)==mp.end()){ // if the sum was not present then only add it for the cases of 0s as we have to see as left as possible
+            mp[sum]=i; // putting [sum,i] in the hashmap
+        }
+    } 
+    return maxLen;
+} // TC = O(n), SC=O(n)
+
+// This is Optimal for the Positives and 0s 
 int longestSubarrayWithSumK(vector<int> &arr,int n,int k){
     // Using 2 pointer approach
     // Both pointers will be pointing to 0th index initially and when the sum goes beyond the k value given we will trim from the left
     int l=0,r=0;
-    long long sum=arr[0];
+    long long sum=arr[0]; // we have already taken the first value
     int maxLen=0;
     while(r<n){ // O(n) as it running from 0 to n
         while(l<=r && sum>k){ // O(n) as it not always running from o to n(it might run for 0(there might be multiple zeroes initially) ones or twice or thrice ).
@@ -661,10 +691,13 @@ int main()
     cout<<endl<<"Find the Number that Appears Ones, Optimal : "<<endl;
     cout<<findNumberThatAppearsOnesOptimal(vec12,n12)<<endl;
 
-    cout<<endl<<"Longest Subarray with sum equals to K, Optimal : "<<endl;
-    vector<int> vec13={1,2,3,1,1,1,14,2,3};
+    vector<int> vec13={1,2,3,1,1,1,1,4,2,3};
     int n13=vec13.size();
-    int k=6;
+    int k=3;
+    cout<<endl<<"Longest Subarray with sum equals to K, Better : "<<endl;
+    cout<<longestSubarrayQithSumKBetter(vec13,n13,k); // 
+
+    cout<<endl<<"Longest Subarray with sum equals to K, Optimal : "<<endl;
     cout<<longestSubarrayWithSumK(vec13,n13,k)<<endl;
 
     return 0;
